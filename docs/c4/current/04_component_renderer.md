@@ -57,7 +57,7 @@ function formatRelativeTime(timestamp: number): string
 `<webview>` 태그의 JSX 인트린직 타입 선언 포함.
 `src`, `allowpopups`, `disablewebsecurity`, `nodeintegration` 등 속성 타입 정의.
 
-### App.tsx
+### App.tsx ✅
 screen 상태 (`'home' | 'editor' | 'present'`)로 화면 전환 관리.
 
 ```typescript
@@ -70,10 +70,21 @@ currentSlideIndex: number
 ```
 
 화면 전환 핸들러:
-- `handleOpenFolder(folderPath, slides, config)` → `'editor'`로 전환
+- `handleOpenFolder(folderPath, slides, config)` → `sortSlides()` 후 `'editor'`로 전환
 - `handleGoHome()` → `window.api.unwatchFolder()` 호출 후 `'home'`으로
 - `handlePresent()` → `window.api.setFullscreen(true)` 후 `'present'`로
 - `handleExitPresent()` → `window.api.setFullscreen(false)` 후 `'editor'`로
+
+### screens/Home.tsx ✅
+홈 화면. `data-testid="home-screen"` 속성 포함.
+
+- 마운트 시 `window.api.getHistory()` 호출 → 최근 항목 목록 표시
+- "폴더 열기" 버튼 → `openFolderDialog()` → `hasConfig()` 분기
+  - 기존 프로젝트: `openExistingFolder()` → `addHistory()` → onOpenFolder 콜백
+  - 신규 프로젝트: 해상도 선택 모달 → `setupFolder()` → `addHistory()` → onOpenFolder 콜백
+- 히스토리 항목 클릭 → `hasConfig()` 분기 (위와 동일)
+- 히스토리 항목 우클릭 → 커스텀 컨텍스트 메뉴 → `removeHistory()`
+- 해상도 옵션: 1280x720(HD), 1920x1080(FHD), 1024x768(XGA)
 
 ### components/Thumbnail.tsx
 - `<webview>` 태그로 슬라이드를 슬라이드 원본 크기로 렌더링
@@ -86,32 +97,33 @@ currentSlideIndex: number
 
 ## 진행 중인 것
 
-### screens/Home.tsx
-- [ ] 폴더 열기 버튼 → `window.api.openFolderDialog()`
-- [ ] 히스토리 목록 표시 (`window.api.getHistory()`)
-- [ ] 히스토리 항목 클릭 → `hasConfig` 확인 후 열기 또는 해상도 모달 표시
-- [ ] 우클릭 컨텍스트 메뉴 → `window.api.removeHistory()`
-- [ ] 해상도 선택 모달 (신규 프로젝트 시)
+### screens/Editor.tsx ✅
+- `data-testid="editor-screen"` 포함
+- 좌측 썸네일 사이드바 (Thumbnail 목록, THUMB_W=180, THUMB_H=101)
+- 메인 SlideView (현재 선택 슬라이드)
+- 하단 툴바: ◁, `data-testid="slide-counter"` (N / 전체), 다음 슬라이드, 발표 모드, 터미널, 홈
+- `window.api.onSlidesUpdated` 구독 + cleanup
+- 슬라이드 없음 상태: "슬라이드가 없습니다" 표시
 
-### screens/Editor.tsx
-- [ ] 좌측 썸네일 사이드바 (Thumbnail 목록)
-- [ ] 메인 슬라이드 뷰 (SlideView)
-- [ ] 하단 툴바 (◁ N/전체 ▷, 발표 모드 버튼, 터미널 버튼)
-- [ ] 해상도 설정 모달
-- [ ] `window.api.onSlidesUpdated` 구독
+### screens/Present.tsx ✅
+- `data-testid="present-screen"` 포함
+- SlideView 재사용으로 전체화면 슬라이드 렌더링
+- 키보드 네비게이션: ← → Space (이동), ESC (종료 → onExit)
+- 마우스 이동 시 슬라이드 번호 오버레이 3초간 표시 (`data-testid="present-overlay"`)
+- 상태: `currentIndex`, `showOverlay`
 
-### screens/Present.tsx
-- [ ] 풀스크린 슬라이드 뷰
-- [ ] 키보드 네비게이션 (←→ Space ESC)
-- [ ] 슬라이드 번호 오버레이 (마우스 호버 시만)
-
-### components/SlideView.tsx
-- [ ] 컨테이너 크기 기준 scale 자동 계산 (ResizeObserver)
-- [ ] 현재 슬라이드 webview 렌더링
-- [ ] `fillScreen` prop (발표 모드용)
+### components/SlideView.tsx ✅
+- ResizeObserver로 컨테이너 크기 감지 → `scale = min(w/slideW, h/slideH)`
+- scale > 0 일 때만 webview 마운트 (초기 scale=0으로 시작)
+- clip wrapper: `width: scaledW, height: scaledH, overflow: hidden`
+- webview: `width: slideWidth, height: slideHeight, transform: scale(scale), transformOrigin: top left`
+- **주의**: webview에 `display: block` 금지 → 내부 viewport 높이가 150px(기본값)으로 망가짐
+- **주의**: webview에 CSS `zoom` 금지 → 내부 viewport 계산 오류 발생
+- `window.api.onSlideChanged` 구독 → 파일 변경 시 webview `.reload()`
+- ADR: `docs/features/editor/2-design/decisions/ADR-001-webview-rendering.md`
 
 ---
 
 ## 미구현된 것
 
-- `components/SlideView.tsx` — 아직 파일 없음
+- `screens/Present.tsx` — 스텁만 존재 (발표 모드 미구현)

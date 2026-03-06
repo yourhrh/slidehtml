@@ -35,7 +35,7 @@ function loadStore(): StoreData {
   } catch {
     storeData = { ...DEFAULT_DATA }
   }
-  return storeData
+  return storeData!
 }
 
 function saveStore(data: StoreData): void {

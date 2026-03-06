@@ -1,5 +1,5 @@
-appId: com.electron.app
-productName: slidehtml
+appId: com.slidehtml.app
+productName: SlideHTML
 directories:
   buildResources: build
 files:
@@ -31,15 +31,11 @@ dmg:
 linux:
   target:
     - AppImage
-    - snap
     - deb
-  maintainer: electronjs.org
   category: Utility
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
 publish:
-  provider: generic
-  url: https://example.com/auto-updates
-electronDownload:
-  mirror: https://npmmirror.com/mirrors/electron/
+  provider: github
+  releaseType: draft

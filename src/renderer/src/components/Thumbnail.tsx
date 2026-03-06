@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'
+import React, { useRef, useEffect } from 'react'
 import { toFileUrl } from '../utils'
 
 interface ThumbnailProps {

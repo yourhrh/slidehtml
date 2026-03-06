@@ -28,10 +28,10 @@ MVP 핵심 구현 완료. Main Process IPC 핸들러, Preload contextBridge API,
 | Instruction Generator | `src/main/fileManager.ts` | 구현됨 |
 | Context Bridge | `src/preload/index.ts` | 구현됨 |
 | IPC Type Definition | `src/preload/index.d.ts` | 구현됨 |
-| App (Router Root) | `src/renderer/src/App.tsx` | 구현됨 (진행 중) |
-| Home Screen | `src/renderer/src/screens/Home.tsx` | 구현됨 (진행 중) |
-| Editor Screen | `src/renderer/src/screens/Editor.tsx` | 구현됨 (진행 중) |
-| Present Screen | `src/renderer/src/screens/Present.tsx` | 구현됨 (진행 중) |
-| Thumbnail | `src/renderer/src/components/Thumbnail.tsx` | 구현됨 (진행 중) |
-| SlideView | `src/renderer/src/components/SlideView.tsx` | 미구현 |
+| App (Router Root) | `src/renderer/src/App.tsx` | 구현됨 |
+| Home Screen | `src/renderer/src/screens/Home.tsx` | 구현됨 |
+| Editor Screen | `src/renderer/src/screens/Editor.tsx` | 구현됨 |
+| Present Screen | `src/renderer/src/screens/Present.tsx` | 구현됨 |
+| Thumbnail | `src/renderer/src/components/Thumbnail.tsx` | 구현됨 |
+| SlideView | `src/renderer/src/components/SlideView.tsx` | 구현됨 |
 | utils (sortSlides, toFileUrl 등) | `src/renderer/src/utils/index.ts` | 구현됨 |
