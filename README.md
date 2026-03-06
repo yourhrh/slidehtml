@@ -1,5 +1,7 @@
 # SlideHTML
 
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-yourhrh-FFDD00?style=flat&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/yourhrh)
+
 **The presentation tool for the AI age.**
 Use Claude Code, Gemini CLI, or Cursor to build slides — SlideHTML turns any HTML file into a presentation, live.
 
