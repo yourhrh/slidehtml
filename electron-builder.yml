@@ -31,7 +31,6 @@ dmg:
 linux:
   target:
     - AppImage
-    - deb
   category: Utility
 appImage:
   artifactName: ${name}-${version}.${ext}
