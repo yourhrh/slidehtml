@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm install --save-dev @cucumber/cucumber playwright ts-node @types/node @playwright/test 2>&1 | tail -20)"
+      "Bash(npm install --save-dev @cucumber/cucumber playwright ts-node @types/node @playwright/test 2>&1 | tail -20)",
+      "Bash(npm install --save-dev cross-env 2>&1 | tail -5)"
     ]
   }
 }
