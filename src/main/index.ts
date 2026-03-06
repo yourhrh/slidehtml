@@ -1,24 +1,98 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
-import { join } from 'path'
+import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
+import { join, basename } from 'path'
+import { existsSync, readdirSync } from 'fs'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import {
+  readConfig,
+  writeConfig,
+  setupProject,
+  updateInstructionFiles,
+  hasConfig,
+  ProjectConfig
+} from './fileManager'
+import { getHistory, addHistory, removeHistory, HistoryItem } from './store'
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let watcher: any = null
+let mainWindow: BrowserWindow | null = null
+
+function sortSlideFiles(files: string[]): string[] {
+  return files.sort((a, b) => {
+    const nameA = basename(a)
+    const nameB = basename(b)
+    return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' })
+  })
+}
+
+function getSlideFiles(folderPath: string): string[] {
+  const slidesDir = join(folderPath, 'slides')
+  if (!existsSync(slidesDir)) return []
+  const files = readdirSync(slidesDir)
+    .filter((f) => f.toLowerCase().endsWith('.html'))
+    .map((f) => join(slidesDir, f))
+  return sortSlideFiles(files)
+}
+
+async function startWatcher(folderPath: string): Promise<void> {
+  if (watcher) {
+    await watcher.close()
+    watcher = null
+  }
+
+  const slidesDir = join(folderPath, 'slides')
+  if (!existsSync(slidesDir)) return
+
+  const chokidar = await import('chokidar')
+
+  watcher = chokidar.watch(slidesDir, {
+    ignoreInitial: true,
+    ignored: /(^|[/\\])\../,
+    awaitWriteFinish: {
+      stabilityThreshold: 300,
+      pollInterval: 100
+    }
+  })
+
+  const sendUpdate = (): void => {
+    const slides = getSlideFiles(folderPath)
+    mainWindow?.webContents.send('slides:updated', slides)
+    try {
+      const config = readConfig(folderPath)
+      updateInstructionFiles(folderPath, config)
+    } catch (err) {
+      console.error('Failed to update instruction files:', err)
+    }
+  }
+
+  watcher
+    .on('add', sendUpdate)
+    .on('unlink', sendUpdate)
+    .on('change', (changedPath: string) => {
+      mainWindow?.webContents.send('slide:changed', changedPath)
+    })
+}
 
 function createWindow(): void {
-  // Create the browser window.
-  const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+  mainWindow = new BrowserWindow({
+    width: 1280,
+    height: 820,
+    minWidth: 900,
+    minHeight: 600,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
+      sandbox: false,
+      webviewTag: true,
+      contextIsolation: true,
+      nodeIntegration: false
     }
   })
 
   mainWindow.on('ready-to-show', () => {
-    mainWindow.show()
+    mainWindow!.show()
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -26,8 +100,6 @@ function createWindow(): void {
     return { action: 'deny' }
   })
 
-  // HMR for renderer base on electron-vite cli.
-  // Load the remote URL for development or the local html file for production.
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
@@ -35,40 +107,113 @@ function createWindow(): void {
   }
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
-  // Set app user model id for windows
-  electronApp.setAppUserModelId('com.electron')
+// IPC Handlers
+ipcMain.handle('folder:open', async () => {
+  const result = await dialog.showOpenDialog(mainWindow!, {
+    properties: ['openDirectory'],
+    title: '프레젠테이션 폴더 열기'
+  })
+  if (result.canceled || !result.filePaths[0]) return null
+  return result.filePaths[0]
+})
 
-  // Default open or close DevTools by F12 in development
-  // and ignore CommandOrControl + R in production.
-  // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
+ipcMain.handle('folder:has-config', async (_, folderPath: string) => {
+  return hasConfig(folderPath)
+})
+
+ipcMain.handle('folder:setup', async (_, folderPath: string, config: ProjectConfig) => {
+  setupProject(folderPath, config)
+  await startWatcher(folderPath)
+  const slides = getSlideFiles(folderPath)
+  return { slides, config }
+})
+
+ipcMain.handle('folder:open-existing', async (_, folderPath: string) => {
+  await startWatcher(folderPath)
+  const config = readConfig(folderPath)
+  const slides = getSlideFiles(folderPath)
+  return { slides, config }
+})
+
+ipcMain.handle('folder:getSlides', async (_, folderPath: string) => {
+  return getSlideFiles(folderPath)
+})
+
+ipcMain.handle('config:get', async (_, folderPath: string) => {
+  return readConfig(folderPath)
+})
+
+ipcMain.handle('config:update', async (_, folderPath: string, config: ProjectConfig) => {
+  writeConfig(folderPath, config)
+  updateInstructionFiles(folderPath, config)
+  return config
+})
+
+ipcMain.handle('history:getAll', async () => {
+  return getHistory()
+})
+
+ipcMain.handle('history:add', async (_, item: HistoryItem) => {
+  addHistory(item)
+})
+
+ipcMain.handle('history:remove', async (_, folderPath: string) => {
+  removeHistory(folderPath)
+})
+
+ipcMain.handle('terminal:open', async (_, folderPath: string) => {
+  if (process.platform === 'darwin') {
+    try {
+      const { exec } = await import('child_process')
+      exec(
+        `osascript -e 'tell application "iTerm2" to create window with default profile command "cd \\"${folderPath}\\""'`,
+        (err) => {
+          if (err) {
+            exec(`open -a Terminal "${folderPath}"`)
+          }
+        }
+      )
+    } catch {
+      shell.openPath(folderPath)
+    }
+  } else if (process.platform === 'win32') {
+    const { exec } = await import('child_process')
+    exec(`start cmd /K "cd /d "${folderPath}""`)
+  } else {
+    shell.openPath(folderPath)
+  }
+})
+
+ipcMain.handle('window:setFullscreen', async (_, fullscreen: boolean) => {
+  mainWindow?.setFullScreen(fullscreen)
+})
+
+ipcMain.on('folder:unwatch', async () => {
+  if (watcher) {
+    await watcher.close()
+    watcher = null
+  }
+})
+
+app.whenReady().then(() => {
+  electronApp.setAppUserModelId('com.slidehtml')
+
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // IPC test
-  ipcMain.on('ping', () => console.log('pong'))
-
   createWindow()
 
   app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
 })
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
-app.on('window-all-closed', () => {
+app.on('window-all-closed', async () => {
+  if (watcher) {
+    await watcher.close()
+  }
   if (process.platform !== 'darwin') {
     app.quit()
   }
 })
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
