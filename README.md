@@ -1,7 +1,5 @@
 # SlideHTML
 
-[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-yourhrh-FFDD00?style=flat&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/yourhrh)
-
 **The presentation tool for the AI age.**
 Use Claude Code, Gemini CLI, or Cursor to build slides — SlideHTML turns any HTML file into a presentation, live.
 
@@ -114,6 +112,18 @@ npm run build:linux
 
 This app was built with Claude Code.
 The launch slides were presented with SlideHTML.
+
+---
+
+## Support
+
+I'm probably the second-poorest developer you'll meet today.
+If SlideHTML saved you from copying and pasting into PowerPoint at 2am, consider buying me a coffee.
+It won't make me rich, but it will make me feel like this was worth it.
+
+<a href="https://buymeacoffee.com/yourhrh" target="_blank">
+  <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="48">
+</a>
 
 ---
 
