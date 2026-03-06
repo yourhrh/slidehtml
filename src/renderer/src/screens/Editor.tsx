@@ -52,7 +52,7 @@ export default function Editor({
     <div className="editor" data-testid="editor-screen">
       <div className="editor-sidebar">
         {slides.length === 0 ? (
-          <div className="sidebar-empty">슬라이드 없음</div>
+          <div className="sidebar-empty">No slides</div>
         ) : (
           slides.map((slide, i) => (
             <Thumbnail
@@ -72,7 +72,7 @@ export default function Editor({
 
       <div className="editor-main">
         {slides.length === 0 ? (
-          <div className="empty-state">슬라이드가 없습니다</div>
+          <div className="empty-state">No slides yet</div>
         ) : (
           <SlideView
             filePath={currentSlide}
@@ -95,18 +95,18 @@ export default function Editor({
             onClick={handleNext}
             disabled={currentSlideIndex >= slides.length - 1}
           >
-            다음 슬라이드
+            ▷
           </button>
         </div>
         <div className="toolbar-actions">
           <button className="btn-secondary" onClick={onPresent} disabled={slides.length === 0}>
-            발표 모드
+            Present
           </button>
           <button className="btn-secondary" onClick={handleTerminal}>
-            터미널
+            Terminal
           </button>
           <button className="btn-ghost" onClick={onGoHome}>
-            홈
+            Home
           </button>
         </div>
       </div>

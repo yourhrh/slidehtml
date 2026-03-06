@@ -97,12 +97,12 @@ export default function Home({ onOpenFolder }: HomeProps): React.JSX.Element {
       <div className="home-content">
         <h1 className="home-title">SlideHTML</h1>
         <button className="btn-primary" onClick={handleOpenFolderClick}>
-          폴더 열기
+          Open Folder
         </button>
 
         {history.length > 0 && (
           <div className="history-section">
-            <h2 className="history-heading">최근 항목</h2>
+            <h2 className="history-heading">Recent</h2>
             <ul className="history-list">
               {history.map((item) => (
                 <li
@@ -113,7 +113,7 @@ export default function Home({ onOpenFolder }: HomeProps): React.JSX.Element {
                 >
                   <span className="history-name">{item.folderName}</span>
                   <span className="history-meta">
-                    {item.slideCount}개 · {formatRelativeTime(item.lastOpened)}
+                    {item.slideCount} slides · {formatRelativeTime(item.lastOpened)}
                   </span>
                 </li>
               ))}
@@ -132,7 +132,7 @@ export default function Home({ onOpenFolder }: HomeProps): React.JSX.Element {
             className="context-menu-item"
             onClick={() => handleRemoveHistory(contextMenu.folderPath)}
           >
-            히스토리에서 제거
+            Remove from history
           </button>
         </div>
       )}
@@ -140,7 +140,7 @@ export default function Home({ onOpenFolder }: HomeProps): React.JSX.Element {
       {pendingFolder && (
         <div className="modal-backdrop" onClick={() => setPendingFolder(null)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h2 className="modal-title">슬라이드 해상도 선택</h2>
+            <h2 className="modal-title">Select Resolution</h2>
             <ul className="resolution-list">
               {RESOLUTIONS.map((r) => (
                 <li key={r.label}>
@@ -158,10 +158,10 @@ export default function Home({ onOpenFolder }: HomeProps): React.JSX.Element {
             </ul>
             <div className="modal-actions">
               <button className="btn-secondary" onClick={() => setPendingFolder(null)}>
-                취소
+                Cancel
               </button>
               <button className="btn-primary" onClick={handleModalConfirm}>
-                확인
+                Confirm
               </button>
             </div>
           </div>
