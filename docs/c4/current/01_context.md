@@ -6,21 +6,30 @@
 
 ## 사용자
 
-사용자와의 상호작용은 Electron 기본 윈도우를 통해 이루어진다.
-앱을 실행하면 900x670 크기의 BrowserWindow가 열리고, 스캐폴드 템플릿 UI가 표시된다.
-사용자가 할 수 있는 것은 F12로 DevTools를 열거나, "Send IPC" 링크를 클릭하는 것뿐이다.
+사용자와의 상호작용은 Electron BrowserWindow를 통해 이루어진다.
+앱을 실행하면 1280x820 크기의 창이 열리고 홈 화면이 표시된다.
+사용자는 폴더를 열고, 슬라이드를 탐색하고, 발표 모드로 전환할 수 있다.
 
 ## 외부 시스템
 
 ### File System
-현재 연결 없음. 파일 시스템 접근 로직이 구현되지 않았다.
+- **읽기**: `slides/` 폴더의 HTML 파일 목록 조회 (`fs.readdirSync`)
+- **쓰기**: `.slidehtml/config.json`, `CLAUDE.md`, `GEMINI.md` 생성/갱신
+- **감시**: chokidar로 `slides/` 폴더 변경 감지 (add / unlink / change)
+- **히스토리**: `app.getPath('userData')/store.json`에 JSON으로 저장
 
 ### LLM Tool
-현재 연결 없음. CLAUDE.md / GEMINI.md가 생성되지 않으므로 LLM 툴과 연동되지 않는다.
+CLAUDE.md, GEMINI.md가 프로젝트 폴더에 자동 생성된다.
+Claude Code, Gemini CLI 등 LLM 툴이 이 파일을 읽어 슬라이드 생성 컨텍스트를 얻는다.
+파일에는 해상도, 현재 슬라이드 수, 다음 파일명이 기록된다.
 
 ### Terminal App
-현재 연결 없음. 터미널 실행 기능이 구현되지 않았다.
+"터미널 열기" 기능으로 해당 프로젝트 폴더를 열 수 있다.
+- macOS: iTerm2 우선, 없으면 Terminal.app
+- Windows: cmd
+- Linux: `shell.openPath`
 
 ### External CDN / Web
-외부 링크를 클릭하면 `shell.openExternal`로 시스템 기본 브라우저에서 열린다.
-이는 슬라이드 webview가 아닌 앱 내 일반 링크 처리다.
+슬라이드 HTML은 `<webview>` 태그로 격리된 렌더러 프로세스에서 실행된다.
+webview는 실제 Chromium처럼 동작하므로 CDN 라이브러리, 외부 이미지, 영상 embed가 모두 허용된다.
+앱 자체의 외부 링크는 `shell.openExternal`로 시스템 브라우저에서 열린다.
