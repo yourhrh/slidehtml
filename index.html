@@ -54,6 +54,8 @@
       padding: 6px 16px; border-radius: 6px; font-size: 14px; font-weight: 600;
     }
     .btn-nav:hover { background: var(--blue); text-decoration: none; }
+    .btn-coffee-nav img { height: 32px; display: block; }
+    .btn-coffee-nav:hover { opacity: 0.85; text-decoration: none; }
 
     /* HERO */
     .hero {
@@ -161,6 +163,18 @@
     .screen-card img { width: 100%; display: block; }
     .screen-label { padding: 12px 16px; background: var(--surface); font-size: 13px; color: var(--muted); }
 
+    /* COFFEE BANNER */
+    .coffee-banner {
+      background: linear-gradient(135deg, rgba(255,221,0,0.08), rgba(255,221,0,0.03));
+      border-top: 1px solid rgba(255,221,0,0.2); border-bottom: 1px solid rgba(255,221,0,0.2);
+      padding: 32px 40px; text-align: center;
+    }
+    .coffee-banner p {
+      font-size: 16px; color: var(--muted); margin-bottom: 16px;
+    }
+    .coffee-banner p strong { color: var(--text); }
+    .coffee-banner img { height: 48px; }
+
     /* DOWNLOAD */
     .download { text-align: center; }
     .download-platforms {
@@ -204,6 +218,9 @@
     </div>
     <div class="nav-links">
       <a href="https://github.com/yourhrh/slidehtml">GitHub</a>
+      <a href="https://buymeacoffee.com/yourhrh" class="btn-coffee-nav" target="_blank">
+        <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee">
+      </a>
       <a href="https://github.com/yourhrh/slidehtml/releases" class="btn-nav">Download</a>
     </div>
   </nav>
@@ -309,6 +326,13 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <div class="coffee-banner">
+    <p><strong>SlideHTML is free.</strong> If it saved you from a late-night copy-paste session, consider buying me a coffee.</p>
+    <a href="https://buymeacoffee.com/yourhrh" target="_blank">
+      <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee">
+    </a>
   </div>
 
   <section class="section">
